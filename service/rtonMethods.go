@@ -19,6 +19,7 @@ import (
 	"github.com/polynetwork/neo-relayer/log"
 	"github.com/polynetwork/poly/common"
 	"github.com/polynetwork/poly/core/types"
+	"poly-bridge/bridgesdk"
 	"sort"
 	"strconv"
 	"strings"
@@ -352,6 +353,40 @@ func (this *SyncService) syncProofToNeo(key string, txHeight, lastSynced uint32)
 	log.Infof("toContract: " + helper.BytesToHex(toMerkleValue.TxParam.ToContract))
 	log.Infof("method: " + helper.BytesToHex(toMerkleValue.TxParam.Method))
 	log.Infof("TxParamArgs: " + helper.BytesToHex(toMerkleValue.TxParam.Args))
+
+	hasPay := false
+	for true {
+		checkFees, err := this.bridgeSdk.CheckFee([]string{hex.EncodeToString(toMerkleValue.TxParam.TxHash)})
+		if err != nil {
+			log.Errorf("checkFee error: %s", err)
+			continue
+		}
+		if checkFees == nil || len(checkFees) == 0 {
+			log.Errorf("checkFee response null")
+			continue
+		}
+		checkfee := checkFees[0]
+		if checkfee.Error != "" {
+			log.Errorf("checkFee response err: %s", checkfee.Error)
+			continue
+		}
+		if checkfee.PayState == bridgesdk.STATE_HASPAY {
+			log.Info("tx (poly: %s, src: %s) has payed.", hex.EncodeToString(toMerkleValue.TxHash), hex.EncodeToString(toMerkleValue.TxParam.TxHash))
+			hasPay = true
+			break
+		} else if checkfee.PayState == bridgesdk.STATE_NOTPAY {
+			log.Info("tx (poly: %s, src: %s) has not payed.", hex.EncodeToString(toMerkleValue.TxHash), hex.EncodeToString(toMerkleValue.TxParam.TxHash))
+			hasPay = false
+			break
+		} else if checkfee.PayState == bridgesdk.STATE_NOTCHECK {
+			log.Info("tx (poly: %s, src: %s) has not check.", hex.EncodeToString(toMerkleValue.TxHash), hex.EncodeToString(toMerkleValue.TxParam.TxHash))
+			continue
+		}
+	}
+
+	if hasPay == false {
+		return nil
+	}
 
 	//toAssetHash, toAddress, amount, err := DeserializeArgs(toMerkleValue.TxParam.Args)
 	//if err != nil {

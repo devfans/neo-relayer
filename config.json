@@ -14,5 +14,6 @@
   "DBPath": "boltdb",
   "ChangeBookkeeper": false,
   "PolyStartHeight": 1340260,
-  "NeoStartHeight": 5093369
+  "NeoStartHeight": 5093369,
+  "BridgeUrl": ["http://40.115.153.174:30330/v1/"]
 }
