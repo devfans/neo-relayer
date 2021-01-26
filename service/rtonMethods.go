@@ -357,7 +357,12 @@ func (this *SyncService) syncProofToNeo(key string, txHeight, lastSynced uint32)
 
 	hasPay := false
 	for true {
-		checkFees, err := this.bridgeSdk.CheckFee([]string{hex.EncodeToString(toMerkleValue.TxParam.TxHash)})
+		checks := make([]*bridgesdk.CheckFeeReq, 0)
+		checks = append(checks, &bridgesdk.CheckFeeReq {
+			ChainId: toMerkleValue.FromChainID,
+			Hash: hex.EncodeToString(toMerkleValue.TxParam.TxHash),
+		})
+		checkFees, err := this.bridgeSdk.CheckFee(checks)
 		if err != nil {
 			log.Errorf("checkFee error: %s", err)
 			continue
