@@ -78,6 +78,7 @@ func startSync(ctx *cli.Context) {
 
 	// create an NEO RPC client
 	neoRpcClient := rpc.NewClient(config.DefConfig.NeoJsonRpcUrl)
+	neoRpcClient4Listen := rpc.NewClient(config.DefConfig.Neo4ListenUrl)
 
 	// open the NEO wallet
 	//neoAccount, err := wallet.NewAccountFromWIF(config.DefConfig.NeoWalletWIF)
@@ -105,7 +106,7 @@ func startSync(ctx *cli.Context) {
 	neoAccount := w.Accounts[0]
 
 	//Start syncing
-	syncService := service.NewSyncService(account, relaySdk, neoAccount, neoRpcClient)
+	syncService := service.NewSyncService(account, relaySdk, neoAccount, neoRpcClient, neoRpcClient4Listen)
 	syncService.Run()
 
 	waitToExit()

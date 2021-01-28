@@ -46,7 +46,7 @@ func (this *SyncService) syncHeaderToRelay(height uint32) error {
 	}
 
 	//Get NEO BlockHeader for syncing
-	response := this.neoSdk.GetBlockHeaderByIndex(height)
+	response := this.neoSdk4Listen.GetBlockHeaderByIndex(height)
 	if response.HasError() {
 		return fmt.Errorf("[syncHeaderToRelay] neoSdk.GetBlockByIndex error: %s", response.Error.Message)
 	}
@@ -85,7 +85,7 @@ func (this *SyncService) syncProofToRelay(key string, height uint32) error {
 	//get current state height
 	var stateHeight uint32 = 0
 	for stateHeight < height {
-		res := this.neoSdk.GetStateHeight()
+		res := this.neoSdk4Listen.GetStateHeight()
 		if res.HasError() {
 			this.db.PutRetry(sink.Bytes())
 			return fmt.Errorf("[syncProofToRelay] neoSdk.GetStateHeight error: %s", res.Error.Message)
@@ -94,7 +94,7 @@ func (this *SyncService) syncProofToRelay(key string, height uint32) error {
 	}
 
 	// get state root
-	res2 := this.neoSdk.GetStateRootByIndex(height)
+	res2 := this.neoSdk4Listen.GetStateRootByIndex(height)
 	if res2.HasError() {
 		this.db.PutRetry(sink.Bytes())
 		return fmt.Errorf("[syncProofToRelay] neoSdk.GetStateRootByIndex error: %s", res2.Error.Message)
@@ -106,7 +106,7 @@ func (this *SyncService) syncProofToRelay(key string, height uint32) error {
 	//fmt.Printf("stateroot: %v", stateRoot)
 
 	// get proof
-	res3 := this.neoSdk.GetProof(stateRoot.StateRoot, "0x"+helper.ReverseString(this.config.NeoCCMC), key)
+	res3 := this.neoSdk4Listen.GetProof(stateRoot.StateRoot, "0x"+helper.ReverseString(this.config.NeoCCMC), key)
 	if res3.HasError() {
 		return fmt.Errorf("[syncProofToRelay] neoSdk.GetProof error: %s", res3.Error.Message)
 	}
@@ -152,7 +152,7 @@ func (this *SyncService) retrySyncProofToRelay(v []byte) error {
 	}
 
 	// get state root
-	res2 := this.neoSdk.GetStateRootByIndex(retry.Height)
+	res2 := this.neoSdk4Listen.GetStateRootByIndex(retry.Height)
 	if res2.HasError() {
 		return fmt.Errorf("[retrySyncProofToRelay] neoSdk.GetStateRootByIndex error: %s", res2.Error.Message)
 	}
@@ -162,7 +162,7 @@ func (this *SyncService) retrySyncProofToRelay(v []byte) error {
 	crossChainMsg := buff.Bytes()
 
 	// get proof
-	res3 := this.neoSdk.GetProof(stateRoot.StateRoot, "0x"+helper.ReverseString(this.config.NeoCCMC), retry.Key)
+	res3 := this.neoSdk4Listen.GetProof(stateRoot.StateRoot, "0x"+helper.ReverseString(this.config.NeoCCMC), retry.Key)
 	if res3.HasError() {
 		return fmt.Errorf("[retrySyncProofToRelay] neoSdk.GetProof error: %s", res3.Error.Message)
 	}

@@ -19,6 +19,7 @@ type SyncService struct {
 
 	neoAccount       *wallet.Account
 	neoSdk           *neoRpc.RpcClient
+	neoSdk4Listen    *neoRpc.RpcClient
 	neoSyncHeight    uint32
 	neoNextConsensus string
 
@@ -29,7 +30,7 @@ type SyncService struct {
 }
 
 // NewSyncService ...
-func NewSyncService(acct *rsdk.Account, relaySdk *rsdk.PolySdk, neoAccount *wallet.Account, neoSdk *neoRpc.RpcClient) *SyncService {
+func NewSyncService(acct *rsdk.Account, relaySdk *rsdk.PolySdk, neoAccount *wallet.Account, neoSdk *neoRpc.RpcClient, neoSdk4Listen *neoRpc.RpcClient) *SyncService {
 	if !checkIfExist(config.DefConfig.DBPath) {
 		os.Mkdir(config.DefConfig.DBPath, os.ModePerm)
 	}
@@ -45,6 +46,7 @@ func NewSyncService(acct *rsdk.Account, relaySdk *rsdk.PolySdk, neoAccount *wall
 
 		neoAccount: neoAccount,
 		neoSdk:     neoSdk,
+		neoSdk4Listen: neoSdk4Listen,
 		db:         boltDB,
 		config:     config.DefConfig,
 		bridgeSdk: sdk,

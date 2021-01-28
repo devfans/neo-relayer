@@ -4,6 +4,7 @@
   "WalletFile": "./poly_test.dat",
   "NeoWalletFile": "./neo_test.json",
   "NeoJsonRpcUrl": "http://seed1.ngd.network:20332",
+  "Neo4ListenUrl": "http://seed1.ngd.network:20332",
   "NeoChainID": 4,
   "NeoCCMC": "9b10bd3bb18120446590f30f8d18446ebbedb610",
   "SpecificContract": "",

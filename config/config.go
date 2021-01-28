@@ -20,6 +20,7 @@ type Config struct {
 
 	NeoWalletFile    string
 	NeoJsonRpcUrl    string
+	Neo4ListenUrl    string
 	NeoChainID       uint64
 	NeoCCMC          string // little endian string
 	SpecificContract string // the specific contract which is monitored

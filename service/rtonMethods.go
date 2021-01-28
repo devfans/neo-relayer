@@ -357,6 +357,7 @@ func (this *SyncService) syncProofToNeo(key string, txHeight, lastSynced uint32)
 
 	hasPay := false
 	for true {
+		time.Sleep(time.Second * 1)
 		checks := make([]*bridgesdk.CheckFeeReq, 0)
 		checks = append(checks, &bridgesdk.CheckFeeReq {
 			ChainId: toMerkleValue.FromChainID,
