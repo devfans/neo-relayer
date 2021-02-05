@@ -287,13 +287,16 @@ func (this *SyncService) retrySyncProofToNeo(v []byte, lastSynced uint32) error 
 			return fmt.Errorf("[syncProofToNeo] MerkleProve error: %s", err)
 		}
 		toMerkleValue, err := DeserializeMerkleValue(stateRootValue)
-
 		if err != nil {
 			return fmt.Errorf("[syncProofToNeo] DeserializeMerkleValue error: %s", err)
 		}
 		if helper.BytesToHex(toMerkleValue.TxParam.ToContract) != this.config.SpecificContract {
 			log.Infof(helper.BytesToHex(toMerkleValue.TxParam.ToContract))
 			log.Infof("This cross chain tx is not for this specific contract.")
+			err := this.db.DeleteNeoRetry(v)
+			if err != nil {
+				return fmt.Errorf("[retrySyncProofToNeo] this.db.DeleteNeoRetry error: %s", err)
+			}
 			return nil
 		}
 	}
