@@ -507,6 +507,9 @@ func (this *SyncService) neoRetryTx() error {
 		if err != nil {
 			log.Errorf("[neoRetryTx] GetCurrentNeoChainSyncHeight error: ", err)
 		}
+		if currentNeoChainSyncHeight == 0 {
+			currentNeoChainSyncHeight = 1
+		}
 		err = this.retrySyncProofToNeo(v, uint32(currentNeoChainSyncHeight))
 		if err != nil {
 			log.Errorf("[neoRetryTx] this.retrySyncProofToNeo error:%s", err)

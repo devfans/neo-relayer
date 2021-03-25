@@ -53,6 +53,9 @@ func (this *SyncService) relayToNeo(m, n uint32) error {
 						if err != nil {
 							log.Errorf("[relayToNeo] GetCurrentNeoChainSyncHeight error: ", err)
 						}
+						if currentNeoChainSyncHeight == 0 {
+							currentNeoChainSyncHeight = 1
+						}
 						err = this.syncProofToNeo(key, i, uint32(currentNeoChainSyncHeight))
 						if err != nil {
 							log.Errorf("--------------------------------------------------")
