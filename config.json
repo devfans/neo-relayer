@@ -17,5 +17,5 @@
   "ChangeBookkeeper": false,
   "PolyStartHeight": 3878077,
   "NeoStartHeight": 6861607,
-  "BridgeUrl": ["https://bridge.poly.network/v1/"]
+  "BridgeUrl":[["https://bridge.poly.network/testnet/v1/"],["http://40.115.136.96:22000/v1/"]]
 }

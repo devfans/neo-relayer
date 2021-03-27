@@ -35,7 +35,7 @@ type Config struct {
 	PolyStartHeight uint32
 	NeoStartHeight  uint32
 
-	BridgeUrl []string
+	BridgeUrl [][]string
 }
 
 //Default config instance

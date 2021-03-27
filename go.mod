@@ -12,7 +12,7 @@ require (
 	github.com/stretchr/testify v1.6.1
 	github.com/urfave/cli v1.22.4
 	golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de
-	poly-bridge v0.0.0-00010101000000-000000000000
+	poly_bridge_sdk v0.0.0-00010101000000-000000000000
 )
 
-replace poly-bridge => github.com/polynetwork/poly-bridge v0.0.0-20210126083254-80335b53070a
+replace poly_bridge_sdk => github.com/blockchain-develop/poly_bridge_sdk v0.0.0-20210327080022-0e6eb4b31700
