@@ -61,7 +61,7 @@ func (this *SyncService) NeoToRelay() {
 
 func (this *SyncService) neoToRelay(m, n uint32) error {
 	for i := m; i < n; i++ {
-		log.Infof("[neoToRelay] start processing NEO block %d", this.relaySyncHeight)
+		log.Infof("[neoToRelay] start processing NEO block %d latest %d", this.relaySyncHeight, n)
 		// request block from NEO, try rpc request 5 times, if failed, continue
 		for j := 0; j < 5; j++ {
 			response := this.neoSdk4Listen.GetBlockByIndex(i)
