@@ -6,16 +6,42 @@ import (
 	"github.com/joeqian10/neo-gogogo/block"
 	"github.com/joeqian10/neo-gogogo/helper"
 	"github.com/joeqian10/neo-gogogo/helper/io"
+	"github.com/joeqian10/neo-gogogo/mpt"
+
 	"github.com/polynetwork/neo-relayer/common"
 	"github.com/polynetwork/neo-relayer/db"
 	"github.com/polynetwork/neo-relayer/log"
 	pCommon "github.com/polynetwork/poly/common"
+	scom "github.com/polynetwork/poly/native/service/cross_chain_manager/common"
 	hsCommon "github.com/polynetwork/poly/native/service/header_sync/common"
 	"github.com/polynetwork/poly/native/service/header_sync/neo"
 	relayUtils "github.com/polynetwork/poly/native/service/utils"
 	"strings"
 	"time"
 )
+
+func verifyFromNeoTx(proof []byte, crosschainMsg *neo.NeoCrossChainMsg) (*scom.MakeTxParam, error) {
+	crossStateProofRoot, err := helper.UInt256FromString(crosschainMsg.StateRoot.StateRoot)
+	if err != nil {
+		return nil, fmt.Errorf("verifyFromNeoTx, decode cross state proof root from string error: %s", err)
+	}
+
+	scriptHash, key, proofs, err := mpt.ResolveProof(proof)
+	if err != nil {
+		return nil, fmt.Errorf("VerifyNeoCrossChainProof, neo-gogogo mpt.ResolveProof error: %v", err)
+	}
+	value, err := mpt.VerifyProof(crossStateProofRoot.Bytes(), scriptHash, key, proofs)
+	if err != nil {
+		return nil, fmt.Errorf("VerifyNeoCrossChainProof, neo-gogogo mpt.VerifyProof error: %v", err)
+	}
+
+	source := pCommon.NewZeroCopySource(value)
+	txParam := new(scom.MakeTxParam)
+	if err := txParam.Deserialization(source); err != nil {
+		return nil, fmt.Errorf("VerifyFromNeoTx, deserialize merkleValue error: %s", err)
+	}
+	return txParam, nil
+}
 
 // GetCurrentRelayChainSyncHeight :get the synced NEO blockHeight from Relay Chain
 func (this *SyncService) GetCurrentRelayChainSyncHeight(neoChainID uint64) (uint32, error) {
@@ -73,6 +99,27 @@ func (this *SyncService) syncHeaderToRelay(height uint32) error {
 	return nil
 }
 
+func (this *SyncService) CheckTargetMethod(proof []byte, msg []byte) bool {
+	crossChainMsg := new(neo.NeoCrossChainMsg)
+	if err := crossChainMsg.Deserialization(pCommon.NewZeroCopySource(msg)); err != nil {
+		log.Errorf("neo MakeDepositProposal, deserialize crossChainMsg error: %v", err)
+		return false
+	}
+
+	tx, err := verifyFromNeoTx(proof, crossChainMsg)
+	if err != nil {
+		log.Errorf("neo MakeDepositProposal, deserialize crossChainMsg error: %v", err)
+		return false
+	}
+
+	if tx.Method != "unlock" {
+		log.Errorf("neo to poly target contract method invalid %s", tx.Method)
+		return false
+	}
+
+	return true
+}
+
 //syncProofToRelay : send StateRoot Proof to Relay Chain
 func (this *SyncService) syncProofToRelay(key string, height uint32) error {
 	retry := &db.Retry{
@@ -117,6 +164,9 @@ func (this *SyncService) syncProofToRelay(key string, height uint32) error {
 	//log.Info(stateRoot.StateRoot, "0x"+helper.ReverseString(this.config.NeoCCMC), key)
 
 	//sending SyncProof transaction to Relay Chain
+	if !this.CheckTargetMethod(proof, crossChainMsg) {
+		return nil
+	}
 	txHash, err := this.relaySdk.Native.Ccm.ImportOuterTransfer(this.config.NeoChainID, nil, height, proof, this.relayAccount.Address[:], crossChainMsg, this.relayAccount)
 	if err != nil {
 		if strings.Contains(err.Error(), "chooseUtxos, current utxo is not enough") {
@@ -203,8 +253,6 @@ func (this *SyncService) waitForRelayBlock() {
 		log.Errorf("[waitForRelayBlock] error: %s", err)
 	}
 }
-
-
 
 func (this *SyncService) checkDoneTx() error {
 	checkMap, err := this.db.GetAllCheck()

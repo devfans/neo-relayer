@@ -290,6 +290,13 @@ func (this *SyncService) retrySyncProofToNeo(v []byte, lastSynced uint32) error 
 		if err != nil {
 			return fmt.Errorf("[syncProofToNeo] DeserializeMerkleValue error: %s", err)
 		}
+
+		method := helper.BytesToHex(toMerkleValue.TxParam.Method)
+		if method != "unlock" {
+			log.Errorf("target contract method invalid %s", method)
+			return fmt.Errorf("relayer to neo target contract method invalid %s", method)
+		}
+
 		if helper.BytesToHex(toMerkleValue.TxParam.ToContract) != this.config.SpecificContract {
 			log.Infof(helper.BytesToHex(toMerkleValue.TxParam.ToContract))
 			log.Infof("This cross chain tx is not for this specific contract.")
@@ -376,9 +383,9 @@ func (this *SyncService) retrySyncProofToNeo(v []byte, lastSynced uint32) error 
 	for true {
 		time.Sleep(time.Second * 1)
 		checks := make([]*poly_bridge_sdk.CheckFeeReq, 0)
-		checks = append(checks, &poly_bridge_sdk.CheckFeeReq {
+		checks = append(checks, &poly_bridge_sdk.CheckFeeReq{
 			ChainId: toMerkleValue.FromChainID,
-			Hash: hex.EncodeToString(toMerkleValue.TxParam.TxHash),
+			Hash:    hex.EncodeToString(toMerkleValue.TxParam.TxHash),
 		})
 		checkFees, err := this.bridgeSdk.CheckFee(checks)
 		if err != nil {
@@ -668,7 +675,7 @@ func (this *SyncService) WaitTransactionConfirm(hash string) bool {
 		time.Sleep(time.Second * 2)
 		res := this.neoSdk.GetTransactionHeight(hash)
 		if res.ErrorResponse.Error.Message != "" {
-			num ++
+			num++
 			continue
 		}
 		height := uint64(res.Result)
