@@ -292,7 +292,7 @@ func (this *SyncService) retrySyncProofToNeo(v []byte, lastSynced uint32) error 
 		}
 
 		method := helper.BytesToHex(toMerkleValue.TxParam.Method)
-		if method != "unlock" {
+		if !METHODS[method] {
 			log.Errorf("target contract method invalid %s", method)
 			return fmt.Errorf("relayer to neo target contract method invalid %s", method)
 		}

@@ -112,7 +112,7 @@ func (this *SyncService) CheckTargetMethod(proof []byte, msg []byte) bool {
 		return false
 	}
 
-	if tx.Method != "unlock" {
+	if !METHODS[tx.Method] {
 		log.Errorf("neo to poly target contract method invalid %s", tx.Method)
 		return false
 	}
