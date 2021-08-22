@@ -9,6 +9,17 @@ import (
 	"time"
 )
 
+var METHODS = map[string]bool{
+	"add":             true,
+	"remove":          true,
+	"swap":            true,
+	"unlock":          true,
+	"addExtension":    true,
+	"removeExtension": true,
+	"registerAsset":   true,
+	"onCrossTransfer": true,
+}
+
 // RelayToNeo sync headers from relay chain to neo
 func (this *SyncService) RelayToNeo() {
 	this.neoSyncHeight = this.config.PolyStartHeight
