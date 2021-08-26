@@ -64,10 +64,13 @@ func (this *SyncService) neoToRelay(m, n uint32) error {
 		log.Infof("[neoToRelay] start processing NEO block %d latest %d", this.relaySyncHeight, n)
 		// request block from NEO, try rpc request 5 times, if failed, continue
 		for j := 0; j < 5; j++ {
+			tsp := time.Now()
+			log.Infof("NEO parsing %v /%v tsp %v", i, j, tsp)
 			response := this.neoSdk4Listen.GetBlockByIndex(i)
 			if response.HasError() {
 				return fmt.Errorf("[neoToRelay] neoSdk.GetBlockByIndex error: %s", response.Error.Message)
 			}
+			log.Infof("NEO got block %v elapse %v", i, time.Since(tsp))
 			blk := response.Result
 			if blk.Hash == "" {
 				if j == 4 {
@@ -84,7 +87,9 @@ func (this *SyncService) neoToRelay(m, n uint32) error {
 				if tx.Type != "InvocationTransaction" {
 					continue
 				}
+				log.Infof("NEO get application log %v elapse %v", i, time.Since(tsp))
 				response := this.neoSdk4Listen.GetApplicationLog(tx.Txid)
+				log.Infof("NEO got application log %v elapse %v", i, time.Since(tsp))
 				if response.HasError() {
 					return fmt.Errorf("[neoToRelay] neoSdk.GetApplicationLog error: %s", response.Error.Message)
 				}
@@ -126,7 +131,9 @@ func (this *SyncService) neoToRelay(m, n uint32) error {
 							}
 							key := states[4].Value // hexstring for storeKey: 0102 + toChainId + toRequestId, like 01020501
 							//get relay chain sync height
+							log.Infof("NEO get chain relayer sync height %v elapse %v", i, time.Since(tsp))
 							currentRelayChainSyncHeight, err := this.GetCurrentRelayChainSyncHeight(this.config.NeoChainID)
+							log.Infof("NEO got chain relayer sync height %v elapse %v", i, time.Since(tsp))
 							if err != nil {
 								return fmt.Errorf("[neoToRelay] GetCurrentRelayChainSyncHeight error: %s", err)
 							}
@@ -136,7 +143,9 @@ func (this *SyncService) neoToRelay(m, n uint32) error {
 							} else {
 								passed = currentRelayChainSyncHeight
 							}
+							log.Infof("NEO sync proof to relay %v elapse %v", i, time.Since(tsp))
 							err = this.syncProofToRelay(key, passed)
+							log.Infof("NEO synced proof to relay %v elapse %v", i, time.Since(tsp))
 							if err != nil {
 								log.Errorf("--------------------------------------------------")
 								log.Errorf("[neoToRelay] syncProofToRelay error: %s", err)
@@ -154,7 +163,9 @@ func (this *SyncService) neoToRelay(m, n uint32) error {
 			if blk.NextConsensus != this.neoNextConsensus {
 				log.Infof("[neoToRelay] Syncing Key blockHeader from NEO: %d", blk.Index)
 				// Syncing key blockHeader to Relay Chain
+				log.Infof("NEO sync header to relay  elapse %v", time.Since(tsp))
 				err := this.syncHeaderToRelay(this.relaySyncHeight)
+				log.Infof("NEO synced header to relay elapse %v", time.Since(tsp))
 				if err != nil {
 					log.Errorf("--------------------------------------------------")
 					log.Errorf("[neoToRelay] syncHeaderToRelay error: %s", err)
