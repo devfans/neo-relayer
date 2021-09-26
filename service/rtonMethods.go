@@ -17,9 +17,9 @@ import (
 	"github.com/ontio/ontology-crypto/sm2"
 	"github.com/polynetwork/neo-relayer/db"
 	"github.com/polynetwork/neo-relayer/log"
+	poly_bridge_sdk "github.com/polynetwork/poly-bridge/bridgesdk"
 	"github.com/polynetwork/poly/common"
 	"github.com/polynetwork/poly/core/types"
-	"poly_bridge_sdk"
 	"sort"
 	"strconv"
 	"strings"
@@ -409,6 +409,10 @@ func (this *SyncService) retrySyncProofToNeo(v []byte, lastSynced uint32) error 
 			break
 		} else if checkfee.PayState == poly_bridge_sdk.STATE_NOTPAY {
 			log.Info("tx (poly: %s, src: %s) has not payed.", hex.EncodeToString(toMerkleValue.TxHash), hex.EncodeToString(toMerkleValue.TxParam.TxHash))
+			hasPay = false
+			break
+		} else if checkfee.PayState == poly_bridge_sdk.STATE_NOTPOLYPROXY {
+			log.Info("tx (poly: %s, src: %s) has not POLYPROXY.", hex.EncodeToString(toMerkleValue.TxHash), hex.EncodeToString(toMerkleValue.TxParam.TxHash))
 			hasPay = false
 			break
 		} else if checkfee.PayState == poly_bridge_sdk.STATE_NOTCHECK {

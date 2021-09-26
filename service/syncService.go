@@ -6,9 +6,9 @@ import (
 	"github.com/polynetwork/neo-relayer/config"
 	"github.com/polynetwork/neo-relayer/db"
 	"github.com/polynetwork/neo-relayer/log"
+	poly_bridge_sdk "github.com/polynetwork/poly-bridge/bridgesdk"
 	rsdk "github.com/polynetwork/poly-go-sdk"
 	"os"
-	"poly_bridge_sdk"
 )
 
 // SyncService ...
@@ -23,7 +23,7 @@ type SyncService struct {
 	neoSyncHeight    uint32
 	neoNextConsensus string
 
-	bridgeSdk   *poly_bridge_sdk.BridgeFeeCheck
+	bridgeSdk *poly_bridge_sdk.BridgeSdk
 
 	db     *db.BoltDB
 	config *config.Config
@@ -39,17 +39,17 @@ func NewSyncService(acct *rsdk.Account, relaySdk *rsdk.PolySdk, neoAccount *wall
 		log.Errorf("db.NewWaitingDB error:%s", err)
 		os.Exit(1)
 	}
-	sdk := poly_bridge_sdk.NewBridgeFeeCheck(config.DefConfig.BridgeUrl, 5)
+	sdk := poly_bridge_sdk.NewBridgeSdk(config.DefConfig.BridgeUrl[0][0])
 	syncSvr := &SyncService{
 		relayAccount: acct,
 		relaySdk:     relaySdk,
 
-		neoAccount: neoAccount,
-		neoSdk:     neoSdk,
+		neoAccount:    neoAccount,
+		neoSdk:        neoSdk,
 		neoSdk4Listen: neoSdk4Listen,
-		db:         boltDB,
-		config:     config.DefConfig,
-		bridgeSdk: sdk,
+		db:            boltDB,
+		config:        config.DefConfig,
+		bridgeSdk:     sdk,
 	}
 	return syncSvr
 }
