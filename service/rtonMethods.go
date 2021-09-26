@@ -19,7 +19,7 @@ import (
 	"github.com/polynetwork/neo-relayer/log"
 	"github.com/polynetwork/poly/common"
 	"github.com/polynetwork/poly/core/types"
-	"poly_bridge_sdk"
+	poly_bridge_sdk "poly-bridge/bridgesdk"
 	"sort"
 	"strconv"
 	"strings"
@@ -409,6 +409,10 @@ func (this *SyncService) retrySyncProofToNeo(v []byte, lastSynced uint32) error 
 			break
 		} else if checkfee.PayState == poly_bridge_sdk.STATE_NOTPAY {
 			log.Info("tx (poly: %s, src: %s) has not payed.", hex.EncodeToString(toMerkleValue.TxHash), hex.EncodeToString(toMerkleValue.TxParam.TxHash))
+			hasPay = false
+			break
+		} else if checkfee.PayState == poly_bridge_sdk.STATE_NOTPOLYPROXY {
+			log.Info("tx (poly: %s, src: %s) has not POLYPROXY.", hex.EncodeToString(toMerkleValue.TxHash), hex.EncodeToString(toMerkleValue.TxParam.TxHash))
 			hasPay = false
 			break
 		} else if checkfee.PayState == poly_bridge_sdk.STATE_NOTCHECK {
