@@ -113,8 +113,8 @@ func (this *SyncService) CheckTargetMethod(proof []byte, msg []byte) bool {
 	}
 
 	method, _ := hex.DecodeString(tx.Method)
-	if !METHODS[string(method)] {
-		log.Errorf("neo to poly target contract method invalid %s", string(method))
+	if !METHODS[string(method)] && !METHODS[tx.Method] {
+		log.Errorf("neo to poly target contract method invalid %s %s", string(method), tx.Method)
 		return false
 	}
 
