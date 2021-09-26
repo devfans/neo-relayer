@@ -6,9 +6,9 @@ import (
 	"github.com/polynetwork/neo-relayer/config"
 	"github.com/polynetwork/neo-relayer/db"
 	"github.com/polynetwork/neo-relayer/log"
+	poly_bridge_sdk "github.com/polynetwork/poly-bridge/bridgesdk"
 	rsdk "github.com/polynetwork/poly-go-sdk"
 	"os"
-	poly_bridge_sdk "poly-bridge/bridgesdk"
 )
 
 // SyncService ...
