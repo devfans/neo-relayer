@@ -32,8 +32,12 @@ func setupApp() *cli.App {
 		cmd.ConfigPathFlag,
 		cmd.NeoPwd,
 		cmd.RelayPwd,
+		cli.StringFlag{
+			Name: "hash",
+			Usage: "Poly tx hash",
+		},
 	}
-	app.Commands = []cli.Command{}
+	app.Commands = []cli.Command {}
 	app.Before = func(context *cli.Context) error {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 		return nil
@@ -107,6 +111,14 @@ func startSync(ctx *cli.Context) {
 
 	//Start syncing
 	syncService := service.NewSyncService(account, relaySdk, neoAccount, neoRpcClient, neoRpcClient4Listen)
+	polyHash := ctx.String("hash")
+	if len(polyHash) > 0 {
+		err = syncService.SubmitPolyTx(polyHash)
+		if err != nil {
+			panic(err)
+		}
+		return
+	}
 	syncService.Run()
 
 	waitToExit()
